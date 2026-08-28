@@ -62,12 +62,17 @@ let sendData = async (data) => {
     });
     //.json por que los datos se mandaron en formato texto y para usarlos los pasamos
     //a su formato original (La respuesta queda en la variable  userLogin)
-    let userLogin = await respuesta.json();
-    // console.log(userLogin);
-    //Saludo basado en el nombre ese nombre esta en la base de datos
-    alert(`Bienvenido: ${userLogin.nombre}`);
-
-    location.href = "index.html";
+    //Validdacion de usuario y contraseña
+    if (respuesta.status === 401) {
+      alert("El usuario y/o contraseña es incorrecta");
+    } else {
+      let userLogin = await respuesta.json();
+      //Saludo basado en el nombre ese nombre esta en la base de datos
+      alert(`Bienvenido: ${userLogin.nombre}`);
+      //Guardar datos en localStorage
+      localStorage.setItem("userLogin", JSON.stringify(userLogin));
+      location.href = "index.html";
+    }
   } catch (error) {
     console.log(error);
   }
