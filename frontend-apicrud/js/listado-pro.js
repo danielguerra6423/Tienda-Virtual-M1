@@ -4,35 +4,34 @@ let searchInput = document.querySelector("#search-input");
 
 //Evento para probar el campo de buscar
 searchInput.addEventListener("keyup", () => {
-    console.log(searchInput.value);
+  console.log(searchInput.value);
 });
 
 //Evento para el navegador
 document.addEventListener("DOMContentLoaded", () => {
-    getTableData();
+  getTableData();
 });
-
 
 //Función para traer los datos de la BD a la tabla
 let getTableData = async () => {
-    let url = "http://localhost/Tienda-Virtual-M1/backend-apiCrud/productos"; //validar URL
+  let url = "http://localhost/backend-apiCrud/productos"; //validar URL
 
-    try {
-        let respuesta = await fetch(url, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-        if (respuesta.status === 204) {
-            console.log("No hay datos en la BD")
-        } else {
-            let tableData = await respuesta.json();
-            console.log(tableData);
-            //Agregar los datos a la tabla
-            tableData.forEach((dato, i) => {
-                let row = document.createElement("tr");
-                row.innerHTML = `
+  try {
+    let respuesta = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (respuesta.status === 204) {
+      console.log("No hay datos en la BD");
+    } else {
+      let tableData = await respuesta.json();
+      console.log(tableData);
+      //Agregar los datos a la tabla
+      tableData.forEach((dato, i) => {
+        let row = document.createElement("tr");
+        row.innerHTML = `
         <td>${i + 1}</td>
         <td>${dato.nombre}</td>
         <td>${dato.descripcion}</td>
@@ -54,22 +53,16 @@ let getTableData = async () => {
             </button>
         </td>
         `;
-                tablePro.appendChild(row);
-
-            });
-        }
-
-    } catch (error) {
-        console.log(error);
+        tablePro.appendChild(row);
+      });
     }
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 //Funcion para editar productos de la tabla
-let editDataTable = (pos ) =>{
-
-}
+let editDataTable = (pos) => {};
 
 //Funcion para eliminar productos de la tabla
-let deleteDataTable = (pos ) =>{
-
-}
+let deleteDataTable = (pos) => {};
