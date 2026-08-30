@@ -17,9 +17,9 @@ let btnCancel = document.querySelector(".btn-cancel");
 //asi editDataTable(pos) puede leer productos[pos] y sacar su id
 let productos = [];
 
-//Evento para probar el campo de buscar
+//Evento para el campo de buscar
 searchInput.addEventListener("keyup", () => {
-  console.log(searchInput.value);
+  searchPorduct();
 });
 
 //Evento para el navegador
@@ -41,6 +41,13 @@ btnCancel.addEventListener("click", () => {
   formEdit.classList.add("d-none");
 });
 
+//Evento al cambiar el producto seleccionado: autocompleta precio e imagen (igual que en crear-pro.html)
+nameEdit.addEventListener("change", () => {
+  const imagenSeleccionada = imagenes.find((imagen) => imagen.name == nameEdit.value);
+  priceEdit.value = imagenSeleccionada.precio;
+  imagenEdit.value = imagenSeleccionada.url;
+});
+
 //Función para traer los datos de la BD a la tabla
 let getTableData = async () => {
   let url = "http://localhost/backend-apiCrud/productos"; //validar URL
@@ -59,39 +66,47 @@ let getTableData = async () => {
       console.log(tableData);
       //Se guardan en la variable global para poder editarlos/eliminarlos despues
       productos = tableData;
-      //Se limpia la tabla antes de pintar, si no las filas se duplican al refrescar
-      tablePro.innerHTML = "";
-      //Agregar los datos a la tabla
-      tableData.forEach((dato, i) => {
-        let row = document.createElement("tr");
-        row.innerHTML = `
-        <td>${i + 1}</td>
-        <td>${dato.nombre}</td>
-        <td>${dato.descripcion}</td>
-        <td>${dato.precio}</td>
-        <td>${dato.stock}</td>
-        <td> <img src="${dato.imagen}"width="100px"></td>
-        <td>
-            <button id="btn-edit" onclick="editDataTable(${i})" type="button" class="btn btn-warning">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                 <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
-                </svg>
-            </button>
-            <button id="btn-delete" onclick="deleteDataTable(${i})" type="button" class="btn btn-danger">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-                </svg>
-            </button>
-        </td>
-        `;
-        tablePro.appendChild(row);
-      });
+      //Se pintan todos los productos en la tabla
+      pintarTabla(productos);
     }
   } catch (error) {
     console.log(error);
   }
+};
+
+//Funcion para pintar filas en la tabla a partir de una lista de productos
+//lista puede ser el arreglo completo (productos) o un subconjunto filtrado (buscador)
+let pintarTabla = (lista) => {
+  //Se limpia la tabla antes de pintar, si no las filas se duplican al refrescar
+  tablePro.innerHTML = "";
+  lista.forEach((dato) => {
+    //se busca la posicion real en "productos" para que editar/eliminar apunten al producto correcto
+    let i = productos.indexOf(dato);
+    let row = document.createElement("tr");
+    row.innerHTML = `
+    <td>${i + 1}</td>
+    <td>${dato.nombre}</td>
+    <td>${dato.descripcion}</td>
+    <td>${dato.precio}</td>
+    <td>${dato.stock}</td>
+    <td> <img src="${dato.imagen}"width="100px"></td>
+    <td>
+        <button id="btn-edit" onclick="editDataTable(${i})" type="button" class="btn btn-warning">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+             <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+            </svg>
+        </button>
+        <button id="btn-delete" onclick="deleteDataTable(${i})" type="button" class="btn btn-danger">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+            </svg>
+        </button>
+    </td>
+    `;
+    tablePro.appendChild(row);
+  });
 };
 
 //Funcion para editar productos de la tabla
@@ -142,7 +157,7 @@ let getEditProduct = () => {
 
 //Funcion para recibir los datos y enviar la actualizacion al servidor
 let updateDataProduct = async (data) => {
-  let url = "http://localhost/Tienda-Virtual-M1/backend-apiCrud/productos";
+  let url = "http://localhost/backend-apiCrud/productos";
 
   try {
     let respuesta = await fetch(url, {
@@ -175,7 +190,9 @@ let deleteDataTable = (pos) => {
   console.log(producto);
 
   //Se pide confirmacion: confirm() devuelve true (Aceptar) o false (Cancelar)
-  let confirmar = confirm(`¿Seguro que desea eliminar el producto "${producto.nombre}"?`);
+  let confirmar = confirm(
+    `¿Seguro que desea eliminar el producto "${producto.nombre}"?`,
+  );
 
   //Si el usuario cancela no se envia nada al servidor
   if (!confirmar) {
@@ -188,7 +205,7 @@ let deleteDataTable = (pos) => {
 
 //Funcion para recibir el id y enviar la eliminacion al servidor
 let deleteDataProduct = async (id) => {
-  let url = "http://localhost/Tienda-Virtual-M1/backend-apiCrud/productos";
+  let url = "http://localhost/backend-apiCrud/productos";
 
   try {
     let respuesta = await fetch(url, {
@@ -214,4 +231,24 @@ let deleteDataProduct = async (id) => {
   } catch (error) {
     console.log(error);
   }
+};
+
+//Funcion para quitar productos de la tabla
+let clearDataTable = () => {
+  let rowTable = document.querySelectorAll("#table-pro > tbody tr");
+  // console.log(rowTable);
+
+  // clearDataTable();
+  rowTable.forEach((row) => {
+    row.remove();
+  });
+};
+
+//funcion para buscar un producto de la tabla por nombre
+let searchPorduct = () => {
+  let texto = searchInput.value.toLowerCase();
+  let encontrados = productos.filter((dato) =>
+    dato.nombre.toLowerCase().includes(texto),
+  );
+  pintarTabla(encontrados);
 };
