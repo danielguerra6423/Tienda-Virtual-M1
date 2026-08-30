@@ -175,7 +175,9 @@ let deleteDataTable = (pos) => {
   console.log(producto);
 
   //Se pide confirmacion: confirm() devuelve true (Aceptar) o false (Cancelar)
-  let confirmar = confirm(`¿Seguro que desea eliminar el producto "${producto.nombre}"?`);
+  let confirmar = confirm(
+    `¿Seguro que desea eliminar el producto "${producto.nombre}"?`,
+  );
 
   //Si el usuario cancela no se envia nada al servidor
   if (!confirmar) {
@@ -188,7 +190,7 @@ let deleteDataTable = (pos) => {
 
 //Funcion para recibir el id y enviar la eliminacion al servidor
 let deleteDataProduct = async (id) => {
-  let url = "http://localhost/Tienda-Virtual-M1/backend-apiCrud/productos";
+  let url = "http://localhost/backend-apiCrud/productos";
 
   try {
     let respuesta = await fetch(url, {
@@ -215,3 +217,17 @@ let deleteDataProduct = async (id) => {
     console.log(error);
   }
 };
+
+//Funcion para quitar productos de la tabla
+let clearDataTable = () => {
+  let rowTable = document.querySelectorAll("#table-pro > tbody tr");
+  // console.log(rowTable);
+
+  // clearDataTable();
+  rowTable.forEach((row) => {
+    row.remove();
+  });
+};
+
+//funcion para buscar un producto de la tabla
+let searchPorduct = () => {};
