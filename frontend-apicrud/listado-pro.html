@@ -306,6 +306,39 @@
                     <!-- Content Row -->
                     <div class="row">
                          <!--================== tabla aqui ===========================--> 
+
+                         <!--================== formulario de edicion (oculto) ===========================-->
+                         <div id="form-edit" class="card w-100 mb-3 d-none">
+                            <div class="card-header py-3">
+                               <h6 class="m-0 font-weight-bold text-primary">Editar Producto</h6>
+                            </div>
+                            <div class="card-body">
+                               <!-- el id no se muestra, solo viaja en la peticion PUT -->
+                               <input type="hidden" id="id-edit">
+                               <div class="form-group">
+                                  <label for="nombre-edit">Nombre</label>
+                                  <input type="text" id="nombre-edit" class="form-control">
+                               </div>
+                               <div class="form-group">
+                                  <label for="des-edit">Descripcion</label>
+                                  <textarea id="des-edit" class="form-control" rows="2"></textarea>
+                               </div>
+                               <div class="form-group">
+                                  <label for="precio-edit">Precio</label>
+                                  <input type="number" id="precio-edit" class="form-control">
+                               </div>
+                               <div class="form-group">
+                                  <label for="stock-edit">Stock</label>
+                                  <input type="number" id="stock-edit" class="form-control">
+                               </div>
+                               <div class="form-group">
+                                  <label for="imagen-edit">Imagen (URL)</label>
+                                  <input type="text" id="imagen-edit" class="form-control">
+                               </div>
+                               <button type="button" class="btn-update btn btn-warning">Guardar cambios</button>
+                               <button type="button" class="btn-cancel btn btn-secondary">Cancelar</button>
+                            </div>
+                         </div>
                          <div class="input-group mb-3 rounded-pill overflow-hidden border w-50">
                             <span class="input-group-text bg-white border-0 pe-1" id="basic-addon1">
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">

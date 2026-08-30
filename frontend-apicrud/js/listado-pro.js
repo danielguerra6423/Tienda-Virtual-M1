@@ -2,6 +2,21 @@
 let tablePro = document.querySelector("#table-pro > tbody");
 let searchInput = document.querySelector("#search-input");
 
+//Variables globales del formulario de edicion
+let formEdit = document.querySelector("#form-edit");
+let idEdit = document.querySelector("#id-edit");
+let nameEdit = document.querySelector("#nombre-edit");
+let descriptionEdit = document.querySelector("#des-edit");
+let priceEdit = document.querySelector("#precio-edit");
+let stockEdit = document.querySelector("#stock-edit");
+let imagenEdit = document.querySelector("#imagen-edit");
+let btnUpdate = document.querySelector(".btn-update");
+let btnCancel = document.querySelector(".btn-cancel");
+
+//Aqui se guardan los productos que llegan de la API,
+//asi editDataTable(pos) puede leer productos[pos] y sacar su id
+let productos = [];
+
 //Evento para probar el campo de buscar
 searchInput.addEventListener("keyup", () => {
   console.log(searchInput.value);
@@ -10,6 +25,20 @@ searchInput.addEventListener("keyup", () => {
 //Evento para el navegador
 document.addEventListener("DOMContentLoaded", () => {
   getTableData();
+});
+
+//Evento al boton de guardar cambios del formulario de edicion
+btnUpdate.addEventListener("click", () => {
+  let dataProduct = getEditProduct();
+  //solo se envia si el formulario paso la validacion
+  if (dataProduct) {
+    updateDataProduct(dataProduct);
+  }
+});
+
+//Evento al boton cancelar: esconde el formulario sin enviar nada
+btnCancel.addEventListener("click", () => {
+  formEdit.classList.add("d-none");
 });
 
 //Función para traer los datos de la BD a la tabla
@@ -28,6 +57,10 @@ let getTableData = async () => {
     } else {
       let tableData = await respuesta.json();
       console.log(tableData);
+      //Se guardan en la variable global para poder editarlos/eliminarlos despues
+      productos = tableData;
+      //Se limpia la tabla antes de pintar, si no las filas se duplican al refrescar
+      tablePro.innerHTML = "";
       //Agregar los datos a la tabla
       tableData.forEach((dato, i) => {
         let row = document.createElement("tr");
@@ -62,7 +95,139 @@ let getTableData = async () => {
 };
 
 //Funcion para editar productos de la tabla
-let editDataTable = (pos) => {};
+//pos es la posicion de la fila (0,1,2...), no el id de la BD
+let editDataTable = (pos) => {
+  //Se busca el producto completo que ya se habia guardado del fetch
+  let producto = productos[pos];
+  console.log(producto);
+
+  //Se precargan los datos del producto en el formulario
+  idEdit.value = producto.id;
+  nameEdit.value = producto.nombre;
+  descriptionEdit.value = producto.descripcion;
+  priceEdit.value = producto.precio;
+  stockEdit.value = producto.stock;
+  imagenEdit.value = producto.imagen;
+
+  //Se muestra el formulario y se lleva la vista hasta el
+  formEdit.classList.remove("d-none");
+  formEdit.scrollIntoView();
+};
+
+//Obtener los datos del formulario de edicion
+let getEditProduct = () => {
+  //valida formulario
+  let product;
+  if (
+    nameEdit.value &&
+    descriptionEdit.value &&
+    priceEdit.value &&
+    stockEdit.value &&
+    imagenEdit.value
+  ) {
+    product = {
+      id: idEdit.value, //el backend lo necesita para saber que fila actualizar
+      nombre: nameEdit.value,
+      descripcion: descriptionEdit.value,
+      precio: priceEdit.value,
+      stock: stockEdit.value,
+      imagen: imagenEdit.value,
+    };
+    console.log(product);
+  } else {
+    alert("Todos los campos obligatorios");
+  }
+  return product;
+};
+
+//Funcion para recibir los datos y enviar la actualizacion al servidor
+let updateDataProduct = async (data) => {
+  let url = "http://localhost/Tienda-Virtual-M1/backend-apiCrud/productos";
+
+  try {
+    let respuesta = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data), //el objeto viaja como texto JSON
+    });
+    if (respuesta.status === 406) {
+      alert("los datos enviados no son admitidos");
+    } else {
+      let mensaje = await respuesta.text();
+      console.log("Lo que respondió el servidor:", mensaje);
+      alert("Producto actualizado con exito");
+      //Se esconde el formulario y se vuelve a pintar la tabla ya actualizada
+      formEdit.classList.add("d-none");
+      getTableData();
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 //Funcion para eliminar productos de la tabla
-let deleteDataTable = (pos) => {};
+//pos es la posicion de la fila (0,1,2...), no el id de la BD
+let deleteDataTable = (pos) => {
+  //Se busca el producto completo que ya se habia guardado del fetch
+  let producto = productos[pos];
+  console.log(producto);
+
+  //Se pide confirmacion: confirm() devuelve true (Aceptar) o false (Cancelar)
+  let confirmar = confirm(
+    `¿Seguro que desea eliminar el producto "${producto.nombre}"?`,
+  );
+
+  //Si el usuario cancela no se envia nada al servidor
+  if (!confirmar) {
+    return;
+  }
+
+  //Si confirmo, se manda el id al servidor
+  deleteDataProduct(producto.id);
+};
+
+//Funcion para recibir el id y enviar la eliminacion al servidor
+let deleteDataProduct = async (id) => {
+  let url = "http://localhost/backend-apiCrud/productos";
+
+  try {
+    let respuesta = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: id }), //el backend lee el id del cuerpo de la peticion
+    });
+    if (respuesta.status === 406) {
+      alert("los datos enviados no son admitidos");
+    } else {
+      let mensaje = await respuesta.text();
+      console.log("Lo que respondió el servidor:", mensaje);
+      alert("Producto eliminado con exito");
+      //Si el producto borrado era el que estaba abierto en el formulario, se esconde
+      if (idEdit.value == id) {
+        formEdit.classList.add("d-none");
+      }
+      //Se vuelve a pintar la tabla ya sin ese producto
+      getTableData();
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+//Funcion para quitar productos de la tabla
+let clearDataTable = () => {
+  let rowTable = document.querySelectorAll("#table-pro > tbody tr");
+  // console.log(rowTable);
+
+  // clearDataTable();
+  rowTable.forEach((row) => {
+    row.remove();
+  });
+};
+
+//funcion para buscar un producto de la tabla
+let searchPorduct = () => {};
